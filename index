@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timekeeper App</title>
+  <style>
+    :root {
+      --bg: #070b17;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel-strong: rgba(255, 255, 255, 0.14);
+      --text: #f5f7ff;
+      --muted: #aeb7d9;
+      --accent: #7dd3fc;
+      --danger: #fb7185;
+      --warning: #facc15;
+      --ok: #86efac;
+      --radius: 24px;
+      --side-width: min(450px, calc(100vw - 24px));
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(125, 211, 252, 0.22), transparent 34%),
+        radial-gradient(circle at 82% 80%, rgba(168, 85, 247, 0.20), transparent 34%),
+        var(--bg);
+      overflow: hidden;
+    }
+
+    body.warning-flash {
+      animation: warningPulse 0.8s ease-in-out infinite alternate;
+    }
+
+    body.danger-flash {
+      animation: dangerPulse 0.45s ease-in-out infinite alternate;
+    }
+
+    @keyframes warningPulse {
+      from { background-color: var(--bg); }
+      to { background-color: #4a3600; }
+    }
+
+    @keyframes dangerPulse {
+      from { background-color: #190711; }
+      to { background-color: #7f1022; }
+    }
+
+    .app {
+      position: relative;
+      height: 100vh;
+      padding: clamp(12px, 2vw, 24px);
+    }
+
+    .main {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(18px, 3vh, 34px);
+      width: 100%;
+      height: 100%;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.35);
+      overflow: hidden;
+    }
+
+    .main::before {
+      content: "";
+      position: absolute;
+      inset: -35%;
+      background: conic-gradient(from 180deg, transparent, rgba(125,211,252,0.13), transparent, rgba(250,204,21,0.09), transparent);
+      animation: rotateGlow 12s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateGlow {
+      to { transform: rotate(360deg); }
+    }
+
+    .top-actions {
+      position: fixed;
+      z-index: 40;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .menu-button {
+      border: 1px solid rgba(255,255,255,0.18);
+      color: var(--text);
+      background: rgba(5, 10, 25, 0.74);
+      backdrop-filter: blur(18px);
+      padding: 13px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 900;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.34);
+    }
+
+    .timer-card {
+      position: relative;
+      z-index: 1;
+      width: min(98vw, 1500px);
+      padding: clamp(24px, 5vw, 70px);
+      border-radius: 38px;
+      background: rgba(4, 8, 22, 0.52);
+      border: 1px solid rgba(255,255,255,0.14);
+      text-align: center;
+      backdrop-filter: blur(20px);
+    }
+
+    .current-label {
+      font-size: clamp(28px, 4vw, 68px);
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      color: var(--accent);
+      margin-bottom: clamp(12px, 2vh, 26px);
+      text-shadow: 0 0 24px rgba(125, 211, 252, 0.28);
+    }
+
+    .timer-display {
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(150px, 30vw, 520px);
+      line-height: 0.78;
+      font-weight: 1000;
+      letter-spacing: -0.095em;
+      text-shadow: 0 0 54px rgba(125, 211, 252, 0.25);
+      transform: translateX(-0.045em);
+    }
+
+    .timer-display.over {
+      color: var(--danger);
+      text-shadow: 0 0 56px rgba(251, 113, 133, 0.38);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: clamp(22px, 3vh, 38px);
+      color: var(--muted);
+      font-size: clamp(18px, 2vw, 30px);
+      font-weight: 700;
+    }
+
+    .controls {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      color: var(--text);
+      background: var(--panel-strong);
+      padding: 14px 20px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform .14s ease, background .14s ease, opacity .14s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.22);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .primary {
+      background: linear-gradient(135deg, #0284c7, #7c3aed);
+      font-weight: 900;
+    }
+
+    .danger {
+      background: rgba(251, 113, 133, 0.22);
+      color: #fecdd3;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0,0,0,0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .24s ease;
+    }
+
+    .overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .side {
+      position: fixed;
+      z-index: 50;
+      top: 0;
+      right: 0;
+      width: var(--side-width);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+      padding: 18px;
+      background: rgba(8, 13, 30, 0.90);
+      border-left: 1px solid rgba(255,255,255,0.15);
+      box-shadow: -28px 0 80px rgba(0,0,0,0.45);
+      backdrop-filter: blur(24px);
+      transform: translateX(105%);
+      transition: transform .28s cubic-bezier(.2,.9,.2,1);
+    }
+
+    .side.open {
+      transform: translateX(0);
+    }
+
+    .side-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 4px 2px 0;
+    }
+
+    .side-title {
+      font-size: 20px;
+      font-weight: 900;
+    }
+
+    .close-button {
+      padding: 9px 13px;
+      border-radius: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+      backdrop-filter: blur(18px);
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 72px 72px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .current-edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.2);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(125, 211, 252, 0.7);
+      box-shadow: 0 0 0 3px rgba(125, 211, 252, 0.13);
+    }
+
+    .progress-wrap {
+      height: 14px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--ok), var(--warning));
+      transition: width .3s linear;
+    }
+
+    .list {
+      overflow: auto;
+      padding-right: 2px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 16px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.09);
+      margin-bottom: 8px;
+    }
+
+    .item.active {
+      border-color: rgba(125, 211, 252, 0.85);
+      box-shadow: inset 0 0 0 1px rgba(125,211,252,0.2), 0 0 22px rgba(125,211,252,0.12);
+    }
+
+    .item-title {
+      font-weight: 900;
+      word-break: break-word;
+    }
+
+    .item-time {
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      margin-top: 3px;
+    }
+
+    .item-buttons {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .item-buttons button {
+      padding: 8px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .small-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        overflow: hidden;
+      }
+      .app {
+        padding: 8px;
+      }
+      .top-actions {
+        top: 12px;
+        right: 12px;
+      }
+      .timer-card {
+        width: 100%;
+        padding: 22px 10px;
+      }
+      .timer-display {
+        font-size: clamp(118px, 36vw, 260px);
+      }
+      .current-label {
+        font-size: clamp(22px, 7vw, 42px);
+      }
+      .controls button {
+        padding: 12px 14px;
+      }
+      .form-grid {
+        grid-template-columns: 1fr 64px 64px;
+      }
+      .current-edit-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .current-edit-grid button {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-actions">
+    <button class="menu-button" id="openSideBtn">進行表 ☰</button>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+
+  <div class="app">
+    <main class="main">
+      <section class="timer-card">
+        <div class="current-label" id="currentLabel">未選択</div>
+        <div class="timer-display" id="timerDisplay">03:00</div>
+        <div class="meta-row">
+          <span id="statusText">右上の進行表から項目を呼び出してください</span>
+          <span id="elapsedText">経過 00:00</span>
+        </div>
+      </section>
+
+      <section class="controls">
+        <button class="primary" id="startPauseBtn">開始</button>
+        <button id="resetBtn">リセット</button>
+        <button id="nextBtn">次へ</button>
+        <button class="danger" id="finishBtn">終了</button>
+      </section>
+    </main>
+  </div>
+
+  <aside class="side" id="sidePanel">
+    <div class="side-header">
+      <div class="side-title">進行表・所要時間</div>
+      <button class="close-button" id="closeSideBtn">閉じる</button>
+    </div>
+
+    <section class="panel">
+      <h2>全体の進行</h2>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <p class="small-note" id="totalText">合計予定時間 00:00 / 完了 0件</p>
+    </section>
+
+    <section class="panel">
+      <h2>表示中タイマーを変更</h2>
+      <div class="current-edit-grid">
+        <label class="input-label">分
+          <input id="currentMinutesInput" type="number" min="0" value="3" />
+        </label>
+        <label class="input-label">秒
+          <input id="currentSecondsInput" type="number" min="0" max="59" value="0" />
+        </label>
+        <button class="primary" id="applyCurrentTimeBtn">反映</button>
+      </div>
+      <p class="small-note">現在表示中の残り時間を直接変更します。進行表の元データも同じ時間に更新されます。</p>
+    </section>
+
+    <section class="panel">
+      <h2>項目を追加</h2>
+      <div class="form-grid">
+        <input id="titleInput" placeholder="例：自己紹介" />
+        <input id="minutesInput" type="number" min="0" value="3" title="分" />
+        <input id="secondsInput" type="number" min="0" max="59" value="0" title="秒" />
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button class="primary" id="addBtn" style="flex:1;">追加</button>
+        <button id="saveBtn">保存</button>
+      </div>
+      <p class="small-note">左から、項目名・分・秒です。例：1分30秒なら「1」「30」。</p>
+    </section>
+
+    <section class="panel list" id="itemList"></section>
+  </aside>
+
+  <script>
+    const STORAGE_KEY = "timekeeper-items-v2";
+    const OLD_STORAGE_KEY = "timekeeper-items-v1";
+
+    const state = {
+      items: loadItems(),
+      activeIndex: 0,
+      remainingSec: 180,
+      initialSec: 180,
+      elapsedSec: 0,
+      running: false,
+      timerId: null,
+      overSec: 0,
+      sideOpen: false,
+    };
+
+    const currentLabel = document.getElementById("currentLabel");
+    const timerDisplay = document.getElementById("timerDisplay");
+    const statusText = document.getElementById("statusText");
+    const elapsedText = document.getElementById("elapsedText");
+    const startPauseBtn = document.getElementById("startPauseBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const finishBtn = document.getElementById("finishBtn");
+    const progressBar = document.getElementById("progressBar");
+    const totalText = document.getElementById("totalText");
+    const titleInput = document.getElementById("titleInput");
+    const minutesInput = document.getElementById("minutesInput");
+    const secondsInput = document.getElementById("secondsInput");
+    const addBtn = document.getElementById("addBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const itemList = document.getElementById("itemList");
+    const sidePanel = document.getElementById("sidePanel");
+    const overlay = document.getElementById("overlay");
+    const openSideBtn = document.getElementById("openSideBtn");
+    const closeSideBtn = document.getElementById("closeSideBtn");
+    const currentMinutesInput = document.getElementById("currentMinutesInput");
+    const currentSecondsInput = document.getElementById("currentSecondsInput");
+    const applyCurrentTimeBtn = document.getElementById("applyCurrentTimeBtn");
+
+    function loadItems() {
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length) {
+            return parsed.map(normalizeItem);
+          }
+        } catch (error) {
+          console.warn("保存データの読み込みに失敗しました", error);
+        }
+      }
+      return [
+        { title: "導入", seconds: 180, done: false },
+        { title: "発表", seconds: 600, done: false },
+        { title: "質疑応答", seconds: 300, done: false },
+        { title: "まとめ", seconds: 120, done: false },
+      ];
+    }
+
+    function normalizeItem(item) {
+      const seconds = Number.isFinite(Number(item.seconds))
+        ? Number(item.seconds)
+        : Math.max(1, Number(item.minutes || 1)) * 60;
+      return {
+        title: item.title || "無題の項目",
+        seconds: Math.max(1, Math.floor(seconds)),
+        done: Boolean(item.done),
+      };
+    }
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items));
+    }
+
+    function clampNumber(value, min, max) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return min;
+      return Math.min(max, Math.max(min, Math.floor(n)));
+    }
+
+    function getSecondsFromInputs(minutesEl, secondsEl) {
+      const minutes = clampNumber(minutesEl.value, 0, 999);
+      const seconds = clampNumber(secondsEl.value, 0, 59);
+      return Math.max(1, minutes * 60 + seconds);
+    }
+
+    function splitSeconds(totalSec) {
+      const sec = Math.max(0, Math.floor(Math.abs(totalSec)));
+      return {
+        minutes: Math.floor(sec / 60),
+        seconds: sec % 60,
+      };
+    }
+
+    function formatTime(totalSec) {
+      const sign = totalSec < 0 ? "+" : "";
+      const sec = Math.abs(Math.floor(totalSec));
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${sign}${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function openSide() {
+      state.sideOpen = true;
+      sidePanel.classList.add("open");
+      overlay.classList.add("open");
+      syncCurrentEditInputs();
+    }
+
+    function closeSide() {
+      state.sideOpen = false;
+      sidePanel.classList.remove("open");
+      overlay.classList.remove("open");
+    }
+
+    function syncCurrentEditInputs() {
+      const parts = splitSeconds(state.remainingSec);
+      currentMinutesInput.value = parts.minutes;
+      currentSecondsInput.value = parts.seconds;
+    }
+
+    function applyCurrentTime() {
+      const newSeconds = getSecondsFromInputs(currentMinutesInput, currentSecondsInput);
+      const wasRunning = state.running;
+      stopTimer();
+
+      state.initialSec = newSeconds;
+      state.remainingSec = newSeconds;
+      state.elapsedSec = 0;
+      state.overSec = 0;
+
+      if (state.items[state.activeIndex]) {
+        state.items[state.activeIndex].seconds = newSeconds;
+        saveItems();
+      }
+
+      if (wasRunning) startTimer();
+      render();
+    }
+
+    function setActive(index, autoStart = false) {
+      if (!state.items[index]) return;
+      stopTimer();
+      state.activeIndex = index;
+      state.initialSec = state.items[index].seconds;
+      state.remainingSec = state.initialSec;
+      state.elapsedSec = 0;
+      state.overSec = 0;
+      state.running = false;
+      if (autoStart) startTimer();
+      render();
+    }
+
+    function startTimer() {
+      if (!state.items[state.activeIndex]) return;
+      state.running = true;
+      startPauseBtn.textContent = "一時停止";
+      clearInterval(state.timerId);
+      state.timerId = setInterval(() => {
+        state.elapsedSec += 1;
+        state.remainingSec -= 1;
+        if (state.remainingSec < 0) state.overSec += 1;
+        renderTimerOnly();
+      }, 1000);
+      render();
+    }
+
+    function stopTimer() {
+      state.running = false;
+      clearInterval(state.timerId);
+      state.timerId = null;
+      startPauseBtn.textContent = "開始";
+      document.body.classList.remove("warning-flash", "danger-flash");
+    }
+
+    function toggleStartPause() {
+      if (state.running) stopTimer();
+      else startTimer();
+      render();
+    }
+
+    function resetCurrent() {
+      stopTimer();
+      state.remainingSec = state.initialSec;
+      state.elapsedSec = 0;
+      state.overSec = 0;
+      render();
+    }
+
+    function finishCurrent() {
+      const item = state.items[state.activeIndex];
+      if (!item) return;
+      item.done = true;
+      stopTimer();
+      saveItems();
+      render();
+    }
+
+    function goNext() {
+      finishCurrent();
+      const nextIndex = state.items.findIndex((item, index) => index > state.activeIndex && !item.done);
+      if (nextIndex >= 0) setActive(nextIndex, false);
+      else render();
+    }
+
+    function addItem() {
+      const title = titleInput.value.trim() || "無題の項目";
+      const seconds = getSecondsFromInputs(minutesInput, secondsInput);
+      state.items.push({ title, seconds, done: false });
+      titleInput.value = "";
+      minutesInput.value = 3;
+      secondsInput.value = 0;
+      saveItems();
+      if (state.items.length === 1) setActive(0);
+      render();
+    }
+
+    function deleteItem(index) {
+      const wasActive = index === state.activeIndex;
+      state.items.splice(index, 1);
+      if (state.activeIndex >= state.items.length) state.activeIndex = Math.max(0, state.items.length - 1);
+      saveItems();
+      if (wasActive && state.items[state.activeIndex]) setActive(state.activeIndex);
+      else render();
+    }
+
+    function moveItem(index, direction) {
+      const nextIndex = index + direction;
+      if (!state.items[index] || !state.items[nextIndex]) return;
+      const [item] = state.items.splice(index, 1);
+      state.items.splice(nextIndex, 0, item);
+      if (state.activeIndex === index) state.activeIndex = nextIndex;
+      else if (state.activeIndex === nextIndex) state.activeIndex = index;
+      saveItems();
+      render();
+    }
+
+    function toggleDone(index) {
+      state.items[index].done = !state.items[index].done;
+      saveItems();
+      render();
+    }
+
+    function renderTimerOnly() {
+      const over = state.remainingSec < 0;
+      timerDisplay.textContent = formatTime(state.remainingSec);
+      timerDisplay.classList.toggle("over", over);
+      elapsedText.textContent = `経過 ${formatTime(state.elapsedSec)}`;
+
+      document.body.classList.toggle("warning-flash", state.remainingSec <= 30 && state.remainingSec > 10);
+      document.body.classList.toggle("danger-flash", state.remainingSec <= 10);
+
+      if (over) {
+        statusText.textContent = `超過 ${formatTime(state.overSec)}`;
+      } else if (state.remainingSec <= 30) {
+        statusText.textContent = "まもなく終了";
+      } else if (state.running) {
+        statusText.textContent = "進行中";
+      } else {
+        statusText.textContent = "待機中";
+      }
+    }
+
+    function render() {
+      const item = state.items[state.activeIndex];
+      if (item) {
+        currentLabel.textContent = item.title;
+        if (!state.running) {
+          timerDisplay.textContent = formatTime(state.remainingSec);
+          timerDisplay.classList.toggle("over", state.remainingSec < 0);
+        }
+      } else {
+        currentLabel.textContent = "項目なし";
+        timerDisplay.textContent = "00:00";
+      }
+
+      renderTimerOnly();
+      startPauseBtn.textContent = state.running ? "一時停止" : "開始";
+
+      const totalSeconds = state.items.reduce((sum, item) => sum + Number(item.seconds), 0);
+      const doneCount = state.items.filter(item => item.done).length;
+      const progress = state.items.length ? (doneCount / state.items.length) * 100 : 0;
+      progressBar.style.width = `${progress}%`;
+      totalText.textContent = `合計予定時間 ${formatTime(totalSeconds)} / 完了 ${doneCount}件`;
+
+      if (state.sideOpen) syncCurrentEditInputs();
+
+      itemList.innerHTML = "";
+      state.items.forEach((item, index) => {
+        const el = document.createElement("div");
+        el.className = `item ${index === state.activeIndex ? "active" : ""}`;
+        el.innerHTML = `
+          <div>
+            <div class="item-title">${escapeHtml(item.title)} ${item.done ? "✓" : ""}</div>
+            <div class="item-time">${formatTime(item.seconds)}</div>
+          </div>
+          <div class="item-buttons">
+            <button data-action="call" data-index="${index}">呼出</button>
+            <button data-action="up" data-index="${index}">↑</button>
+            <button data-action="down" data-index="${index}">↓</button>
+            <button data-action="done" data-index="${index}">完了</button>
+            <button data-action="delete" data-index="${index}">削除</button>
+          </div>
+        `;
+        itemList.appendChild(el);
+      });
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    openSideBtn.addEventListener("click", openSide);
+    closeSideBtn.addEventListener("click", closeSide);
+    overlay.addEventListener("click", closeSide);
+    startPauseBtn.addEventListener("click", toggleStartPause);
+    resetBtn.addEventListener("click", resetCurrent);
+    nextBtn.addEventListener("click", goNext);
+    finishBtn.addEventListener("click", finishCurrent);
+    addBtn.addEventListener("click", addItem);
+    applyCurrentTimeBtn.addEventListener("click", applyCurrentTime);
+    saveBtn.addEventListener("click", () => {
+      saveItems();
+      alert("保存しました");
+    });
+
+    itemList.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button) return;
+      const index = Number(button.dataset.index);
+      const action = button.dataset.action;
+      if (action === "call") {
+        setActive(index);
+        closeSide();
+      }
+      if (action === "up") moveItem(index, -1);
+      if (action === "down") moveItem(index, 1);
+      if (action === "done") toggleDone(index);
+      if (action === "delete") deleteItem(index);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      const isTyping = ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName);
+      if (isTyping) return;
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        toggleStartPause();
+      }
+      if (event.key === "n" || event.key === "N") goNext();
+      if (event.key === "r" || event.key === "R") resetCurrent();
+      if (event.key === "Escape") closeSide();
+      if (event.key === "m" || event.key === "M") {
+        state.sideOpen ? closeSide() : openSide();
+      }
+    });
+
+    setActive(0);
+  </script>
+</body>
+</html>
