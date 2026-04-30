@@ -56,7 +56,7 @@
     .app {
       position: relative;
       height: 100vh;
-      padding: clamp(12px, 2vw, 24px);
+      padding: clamp(8px, 2vw, 24px);
     }
 
     .main {
@@ -65,7 +65,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: clamp(18px, 3vh, 34px);
+      gap: clamp(12px, 2vh, 26px);
       width: 100%;
       height: 100%;
       border-radius: var(--radius);
@@ -114,7 +114,7 @@
       position: relative;
       z-index: 1;
       width: min(98vw, 1500px);
-      padding: clamp(24px, 5vw, 70px);
+      padding: clamp(18px, 4vw, 58px);
       border-radius: 38px;
       background: rgba(4, 8, 22, 0.52);
       border: 1px solid rgba(255,255,255,0.14);
@@ -123,22 +123,24 @@
     }
 
     .current-label {
-      font-size: clamp(28px, 4vw, 68px);
+      font-size: clamp(24px, 3.8vw, 62px);
       font-weight: 900;
       letter-spacing: 0.04em;
       color: var(--accent);
-      margin-bottom: clamp(12px, 2vh, 26px);
+      margin-bottom: clamp(8px, 1.5vh, 22px);
       text-shadow: 0 0 24px rgba(125, 211, 252, 0.28);
     }
 
     .timer-display {
+      pointer-events: none;
       font-variant-numeric: tabular-nums;
-      font-size: clamp(150px, 30vw, 520px);
+      font-size: clamp(142px, 28vw, 500px);
       line-height: 0.78;
       font-weight: 1000;
       letter-spacing: -0.095em;
       text-shadow: 0 0 54px rgba(125, 211, 252, 0.25);
       transform: translateX(-0.045em);
+      user-select: none;
     }
 
     .timer-display.over {
@@ -146,14 +148,50 @@
       text-shadow: 0 0 56px rgba(251, 113, 133, 0.38);
     }
 
+    .quick-adjust {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: clamp(14px, 2vh, 24px);
+    }
+
+    .quick-adjust button {
+      min-width: 74px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      font-size: clamp(15px, 1.4vw, 20px);
+      font-weight: 900;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .quick-adjust .minus {
+      color: #bfdbfe;
+    }
+
+    .quick-adjust .plus {
+      color: #bbf7d0;
+    }
+
+    .quick-adjust-note {
+      width: 100%;
+      color: var(--muted);
+      font-size: clamp(12px, 1.2vw, 15px);
+      margin-top: 2px;
+    }
+
     .meta-row {
       display: flex;
       justify-content: center;
       gap: 18px;
       flex-wrap: wrap;
-      margin-top: clamp(22px, 3vh, 38px);
+      margin-top: clamp(14px, 2.4vh, 30px);
       color: var(--muted);
-      font-size: clamp(18px, 2vw, 30px);
+      font-size: clamp(17px, 1.8vw, 28px);
       font-weight: 700;
     }
 
@@ -178,6 +216,7 @@
       border-radius: 999px;
       cursor: pointer;
       transition: transform .14s ease, background .14s ease, opacity .14s ease;
+      touch-action: manipulation;
     }
 
     button:hover {
@@ -212,6 +251,129 @@
     .overlay.open {
       opacity: 1;
       pointer-events: auto;
+    }
+
+    .help-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .24s ease;
+    }
+
+    .help-screen.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .help-card {
+      width: min(880px, 96vw);
+      min-height: min(620px, 86vh);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+      padding: clamp(22px, 4vw, 42px);
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(125, 211, 252, 0.18), transparent 36%),
+        rgba(8, 13, 30, 0.94);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 30px 100px rgba(0,0,0,0.55);
+    }
+
+    .help-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .help-kicker {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .16em;
+      margin-bottom: 8px;
+    }
+
+    .help-header h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 56px);
+      line-height: 1;
+    }
+
+    .help-close {
+      flex: 0 0 auto;
+      padding: 10px 15px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .help-slide {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 18px;
+      padding: clamp(10px, 3vw, 30px) 0;
+    }
+
+    .help-slide h2 {
+      margin: 0;
+      font-size: clamp(28px, 4.5vw, 52px);
+      line-height: 1.15;
+    }
+
+    .help-slide p {
+      margin: 0;
+      color: #d9e2ff;
+      font-size: clamp(17px, 2.1vw, 26px);
+      line-height: 1.7;
+      font-weight: 650;
+    }
+
+    .help-slide ul {
+      margin: 0;
+      padding-left: 1.2em;
+      color: #d9e2ff;
+      font-size: clamp(16px, 1.9vw, 23px);
+      line-height: 1.7;
+      font-weight: 650;
+    }
+
+    .help-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .help-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .help-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.26);
+    }
+
+    .help-dot.active {
+      width: 28px;
+      background: var(--accent);
     }
 
     .side {
@@ -275,22 +437,6 @@
       grid-template-columns: 1fr 72px 72px;
       gap: 8px;
       align-items: center;
-    }
-
-    .current-edit-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .input-label {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
     }
 
     input {
@@ -377,53 +523,162 @@
     }
 
     @media (max-width: 760px) {
-      body {
-        overflow: hidden;
-      }
       .app {
-        padding: 8px;
+        padding: 6px;
+      }
+      .main {
+        gap: 10px;
+        justify-content: center;
       }
       .top-actions {
-        top: 12px;
-        right: 12px;
+        top: 10px;
+        right: 10px;
+      }
+      .menu-button {
+        padding: 10px 14px;
+        font-size: 14px;
       }
       .timer-card {
         width: 100%;
-        padding: 22px 10px;
+        padding: 18px 8px 16px;
+        border-radius: 26px;
       }
       .timer-display {
-        font-size: clamp(118px, 36vw, 260px);
+        font-size: clamp(112px, 34vw, 250px);
+        line-height: 0.82;
       }
       .current-label {
-        font-size: clamp(22px, 7vw, 42px);
+        font-size: clamp(22px, 6vw, 38px);
+        margin-bottom: 10px;
+      }
+      .quick-adjust {
+        gap: 6px;
+        margin-top: 14px;
+      }
+      .quick-adjust button {
+        min-width: 64px;
+        padding: 11px 10px;
+        border-radius: 15px;
+        font-size: 15px;
+      }
+      .quick-adjust-note {
+        display: none;
+      }
+      .meta-row {
+        font-size: 15px;
+        margin-top: 12px;
+        gap: 10px;
+      }
+      .controls {
+        gap: 8px;
       }
       .controls button {
-        padding: 12px 14px;
+        padding: 12px 13px;
+        font-size: 14px;
       }
       .form-grid {
         grid-template-columns: 1fr 64px 64px;
       }
-      .current-edit-grid {
+      .side {
+        width: min(100vw, 450px);
+        padding: 14px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .top-actions {
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      .help-card {
+        min-height: 82vh;
+        padding: 20px;
+        border-radius: 24px;
+      }
+      .help-header {
+        flex-direction: column;
+      }
+      .help-close {
+        align-self: flex-end;
+        position: absolute;
+        top: 18px;
+        right: 18px;
+      }
+      .help-nav {
+        display: grid;
         grid-template-columns: 1fr 1fr;
       }
-      .current-edit-grid button {
+      .help-dots {
         grid-column: 1 / -1;
+        order: -1;
+      }
+      .help-nav button {
+        padding: 12px 10px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .timer-display {
+        font-size: clamp(92px, 32vw, 160px);
+      }
+      .quick-adjust button {
+        min-width: 56px;
+        font-size: 13px;
+        padding: 10px 8px;
+      }
+      .controls button {
+        flex: 1 1 40%;
       }
     }
   </style>
 </head>
 <body>
   <div class="top-actions">
+    <button class="menu-button" id="helpBtn">Help</button>
     <button class="menu-button" id="openSideBtn">進行表 ☰</button>
   </div>
 
   <div class="overlay" id="overlay"></div>
+
+  <section class="help-screen" id="helpScreen" aria-modal="true" role="dialog">
+    <div class="help-card">
+      <div class="help-header">
+        <div>
+          <div class="help-kicker">TIMEKEEPER GUIDE</div>
+          <h1 id="helpTitle">基本操作</h1>
+        </div>
+        <button class="help-close" id="helpCloseBtn">閉じる</button>
+      </div>
+
+      <div class="help-slide" id="helpSlide">
+        <h2>1. 進行表から項目を呼び出す</h2>
+        <p>右上の「進行表 ☰」を押すと、登録した進行項目が右側からスライドインします。使いたい項目の「呼出」を押すと、その項目のタイマーがメイン画面に表示されます。</p>
+      </div>
+
+      <div class="help-nav">
+        <button id="helpPrevBtn">← 前へ</button>
+        <div class="help-dots" id="helpDots"></div>
+        <button class="primary" id="helpNextBtn">次へ →</button>
+      </div>
+    </div>
+  </section>
 
   <div class="app">
     <main class="main">
       <section class="timer-card">
         <div class="current-label" id="currentLabel">未選択</div>
         <div class="timer-display" id="timerDisplay">03:00</div>
+
+        <div class="quick-adjust" aria-label="表示中タイマーの一時調整">
+          <button class="minus" data-adjust="-60">-1分</button>
+          <button class="minus" data-adjust="-10">-10秒</button>
+          <button class="minus" data-adjust="-1">-1秒</button>
+          <button class="plus" data-adjust="1">+1秒</button>
+          <button class="plus" data-adjust="10">+10秒</button>
+          <button class="plus" data-adjust="60">+1分</button>
+          <div class="quick-adjust-note">表示中の残り時間だけを一時変更します。進行表の登録時間は変わりません。</div>
+        </div>
+
         <div class="meta-row">
           <span id="statusText">右上の進行表から項目を呼び出してください</span>
           <span id="elapsedText">経過 00:00</span>
@@ -451,20 +706,6 @@
         <div class="progress-bar" id="progressBar"></div>
       </div>
       <p class="small-note" id="totalText">合計予定時間 00:00 / 完了 0件</p>
-    </section>
-
-    <section class="panel">
-      <h2>表示中タイマーを変更</h2>
-      <div class="current-edit-grid">
-        <label class="input-label">分
-          <input id="currentMinutesInput" type="number" min="0" value="3" />
-        </label>
-        <label class="input-label">秒
-          <input id="currentSecondsInput" type="number" min="0" max="59" value="0" />
-        </label>
-        <button class="primary" id="applyCurrentTimeBtn">反映</button>
-      </div>
-      <p class="small-note">現在表示中の残り時間を直接変更します。進行表の元データも同じ時間に更新されます。</p>
     </section>
 
     <section class="panel">
@@ -520,9 +761,44 @@
     const overlay = document.getElementById("overlay");
     const openSideBtn = document.getElementById("openSideBtn");
     const closeSideBtn = document.getElementById("closeSideBtn");
-    const currentMinutesInput = document.getElementById("currentMinutesInput");
-    const currentSecondsInput = document.getElementById("currentSecondsInput");
-    const applyCurrentTimeBtn = document.getElementById("applyCurrentTimeBtn");
+    const quickAdjust = document.querySelector(".quick-adjust");
+    const helpBtn = document.getElementById("helpBtn");
+    const helpScreen = document.getElementById("helpScreen");
+    const helpCloseBtn = document.getElementById("helpCloseBtn");
+    const helpTitle = document.getElementById("helpTitle");
+    const helpSlide = document.getElementById("helpSlide");
+    const helpPrevBtn = document.getElementById("helpPrevBtn");
+    const helpNextBtn = document.getElementById("helpNextBtn");
+    const helpDots = document.getElementById("helpDots");
+
+    const helpSlides = [
+      {
+        title: "基本操作",
+        html: `<h2>1. 進行表から項目を呼び出す</h2><p>右上の「進行表 ☰」を押すと、登録した進行項目が右側からスライドインします。使いたい項目の「呼出」を押すと、その項目のタイマーがメイン画面に表示されます。</p>`
+      },
+      {
+        title: "タイマーを動かす",
+        html: `<h2>2. 開始・一時停止・リセット</h2><ul><li>「開始」でカウントダウンを開始します。</li><li>もう一度押すと一時停止します。</li><li>「リセット」で、呼び出した時点の登録時間に戻します。</li><li>「次へ」で現在項目を完了し、次の未完了項目へ進みます。</li></ul>`
+      },
+      {
+        title: "時間の一時調整",
+        html: `<h2>3. 表示中の時間だけを増減する</h2><p>タイマー数字の下にある「+10秒」「-1分」などのボタンで、表示中の残り時間だけを調整できます。これは一時的な変更なので、進行表に登録された元の時間は変わりません。</p>`
+      },
+      {
+        title: "進行表の編集",
+        html: `<h2>4. 項目を追加・並び替えする</h2><p>進行表では、項目名・分・秒を入力して新しい項目を追加できます。各項目の「↑」「↓」で順番を入れ替え、「完了」で進行済みにできます。</p>`
+      },
+      {
+        title: "キーボード操作",
+        html: `<h2>5. ショートカット</h2><ul><li>Space：開始 / 一時停止</li><li>N：次へ</li><li>R：リセット</li><li>M：進行表を開閉</li><li>Esc：画面を閉じる</li><li>← / →：1秒減らす / 増やす</li><li>↓ / ↑：10秒減らす / 増やす</li></ul>`
+      },
+      {
+        title: "警告表示",
+        html: `<h2>6. 終了が近づいたとき</h2><p>残り30秒になると背景が点灯し、残り10秒以下になるとより強く点滅します。時間を超過すると、タイマーは赤色になり、超過時間が表示されます。</p>`
+      }
+    ];
+
+    let helpIndex = 0;
 
     function loadItems() {
       const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY);
@@ -571,14 +847,6 @@
       return Math.max(1, minutes * 60 + seconds);
     }
 
-    function splitSeconds(totalSec) {
-      const sec = Math.max(0, Math.floor(Math.abs(totalSec)));
-      return {
-        minutes: Math.floor(sec / 60),
-        seconds: sec % 60,
-      };
-    }
-
     function formatTime(totalSec) {
       const sign = totalSec < 0 ? "+" : "";
       const sec = Math.abs(Math.floor(totalSec));
@@ -591,7 +859,6 @@
       state.sideOpen = true;
       sidePanel.classList.add("open");
       overlay.classList.add("open");
-      syncCurrentEditInputs();
     }
 
     function closeSide() {
@@ -600,29 +867,42 @@
       overlay.classList.remove("open");
     }
 
-    function syncCurrentEditInputs() {
-      const parts = splitSeconds(state.remainingSec);
-      currentMinutesInput.value = parts.minutes;
-      currentSecondsInput.value = parts.seconds;
+    function openHelp() {
+      helpScreen.classList.add("open");
+      renderHelpSlide();
     }
 
-    function applyCurrentTime() {
-      const newSeconds = getSecondsFromInputs(currentMinutesInput, currentSecondsInput);
-      const wasRunning = state.running;
-      stopTimer();
+    function closeHelp() {
+      helpScreen.classList.remove("open");
+    }
 
-      state.initialSec = newSeconds;
-      state.remainingSec = newSeconds;
-      state.elapsedSec = 0;
-      state.overSec = 0;
+    function renderHelpSlide() {
+      const slide = helpSlides[helpIndex];
+      helpTitle.textContent = slide.title;
+      helpSlide.innerHTML = slide.html;
+      helpPrevBtn.disabled = helpIndex === 0;
+      helpNextBtn.textContent = helpIndex === helpSlides.length - 1 ? "最初へ戻る" : "次へ →";
+      helpDots.innerHTML = helpSlides.map((_, index) => `<span class="help-dot ${index === helpIndex ? "active" : ""}"></span>`).join("");
+    }
 
-      if (state.items[state.activeIndex]) {
-        state.items[state.activeIndex].seconds = newSeconds;
-        saveItems();
+    function nextHelpSlide() {
+      helpIndex = helpIndex === helpSlides.length - 1 ? 0 : helpIndex + 1;
+      renderHelpSlide();
+    }
+
+    function prevHelpSlide() {
+      helpIndex = Math.max(0, helpIndex - 1);
+      renderHelpSlide();
+    }
+
+    function adjustVisibleTime(deltaSec) {
+      state.remainingSec += deltaSec;
+      if (state.remainingSec >= 0) {
+        state.overSec = 0;
+      } else {
+        state.overSec = Math.abs(state.remainingSec);
       }
-
-      if (wasRunning) startTimer();
-      render();
+      renderTimerOnly();
     }
 
     function setActive(index, autoStart = false) {
@@ -646,7 +926,7 @@
       state.timerId = setInterval(() => {
         state.elapsedSec += 1;
         state.remainingSec -= 1;
-        if (state.remainingSec < 0) state.overSec += 1;
+        if (state.remainingSec < 0) state.overSec = Math.abs(state.remainingSec);
         renderTimerOnly();
       }, 1000);
       render();
@@ -770,8 +1050,6 @@
       progressBar.style.width = `${progress}%`;
       totalText.textContent = `合計予定時間 ${formatTime(totalSeconds)} / 完了 ${doneCount}件`;
 
-      if (state.sideOpen) syncCurrentEditInputs();
-
       itemList.innerHTML = "";
       state.items.forEach((item, index) => {
         const el = document.createElement("div");
@@ -802,6 +1080,14 @@
         .replaceAll("'", "&#039;");
     }
 
+    helpBtn.addEventListener("click", openHelp);
+    helpCloseBtn.addEventListener("click", closeHelp);
+    helpNextBtn.addEventListener("click", nextHelpSlide);
+    helpPrevBtn.addEventListener("click", prevHelpSlide);
+    helpScreen.addEventListener("click", (event) => {
+      if (event.target === helpScreen) closeHelp();
+    });
+
     openSideBtn.addEventListener("click", openSide);
     closeSideBtn.addEventListener("click", closeSide);
     overlay.addEventListener("click", closeSide);
@@ -810,10 +1096,20 @@
     nextBtn.addEventListener("click", goNext);
     finishBtn.addEventListener("click", finishCurrent);
     addBtn.addEventListener("click", addItem);
-    applyCurrentTimeBtn.addEventListener("click", applyCurrentTime);
     saveBtn.addEventListener("click", () => {
       saveItems();
       alert("保存しました");
+    });
+
+    function handleAdjustButton(event) {
+      event.preventDefault();
+      const button = event.currentTarget;
+      adjustVisibleTime(Number(button.dataset.adjust));
+    }
+
+    document.querySelectorAll(".quick-adjust button[data-adjust]").forEach((button) => {
+      button.addEventListener("click", handleAdjustButton);
+      button.addEventListener("touchend", handleAdjustButton, { passive: false });
     });
 
     itemList.addEventListener("click", (event) => {
@@ -841,10 +1137,17 @@
       }
       if (event.key === "n" || event.key === "N") goNext();
       if (event.key === "r" || event.key === "R") resetCurrent();
-      if (event.key === "Escape") closeSide();
+      if (event.key === "Escape") {
+        closeHelp();
+        closeSide();
+      }
       if (event.key === "m" || event.key === "M") {
         state.sideOpen ? closeSide() : openSide();
       }
+      if (event.key === "ArrowUp") adjustVisibleTime(10);
+      if (event.key === "ArrowDown") adjustVisibleTime(-10);
+      if (event.key === "ArrowRight") adjustVisibleTime(1);
+      if (event.key === "ArrowLeft") adjustVisibleTime(-1);
     });
 
     setActive(0);
