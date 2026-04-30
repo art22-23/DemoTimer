@@ -383,10 +383,14 @@
       right: 0;
       width: var(--side-width);
       height: 100vh;
+      max-height: 100dvh;
       display: flex;
       flex-direction: column;
       gap: 14px;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
       padding: 18px;
       background: rgba(8, 13, 30, 0.90);
       border-left: 1px solid rgba(255,255,255,0.15);
@@ -469,10 +473,11 @@
     }
 
     .list {
-      overflow: auto;
+      overflow: visible;
       padding-right: 2px;
-      flex: 1;
+      flex: 0 0 auto;
       min-height: 0;
+      padding-bottom: 28px;
     }
 
     .item {
@@ -582,6 +587,8 @@
       .side {
         width: min(100vw, 450px);
         padding: 14px;
+        height: 100dvh;
+        padding-bottom: max(24px, env(safe-area-inset-bottom));
       }
     }
 
@@ -773,28 +780,28 @@
 
     const helpSlides = [
       {
-        title: "基本操作",
-        html: `<h2>1. 進行表から項目を呼び出す</h2><p>右上の「進行表 ☰」を押すと、登録した進行項目が右側からスライドインします。使いたい項目の「呼出」を押すと、その項目のタイマーがメイン画面に表示されます。</p>`
+        title: "使い方",
+        html: `<h2>1. 進行表を開く</h2><p>右上の「進行表 ☰」を押します。使いたい項目の「呼出」を押すと、タイマーに表示されます。</p>`
       },
       {
-        title: "タイマーを動かす",
-        html: `<h2>2. 開始・一時停止・リセット</h2><ul><li>「開始」でカウントダウンを開始します。</li><li>もう一度押すと一時停止します。</li><li>「リセット」で、呼び出した時点の登録時間に戻します。</li><li>「次へ」で現在項目を完了し、次の未完了項目へ進みます。</li></ul>`
+        title: "タイマー操作",
+        html: `<h2>2. タイマーを動かす</h2><ul><li>開始：カウントダウン開始</li><li>一時停止：タイマーを止める</li><li>リセット：元の時間に戻す</li><li>次へ：次の項目へ進む</li></ul>`
       },
       {
-        title: "時間の一時調整",
-        html: `<h2>3. 表示中の時間だけを増減する</h2><p>タイマー数字の下にある「+10秒」「-1分」などのボタンで、表示中の残り時間だけを調整できます。これは一時的な変更なので、進行表に登録された元の時間は変わりません。</p>`
+        title: "時間調整",
+        html: `<h2>3. 時間を少し変える</h2><p>タイマーの下の「+10秒」「-1分」などで、表示中の時間だけを調整できます。登録時間は変わりません。</p>`
       },
       {
         title: "進行表の編集",
-        html: `<h2>4. 項目を追加・並び替えする</h2><p>進行表では、項目名・分・秒を入力して新しい項目を追加できます。各項目の「↑」「↓」で順番を入れ替え、「完了」で進行済みにできます。</p>`
+        html: `<h2>4. 項目を編集する</h2><p>進行表では、項目の追加・削除・並び替えができます。分と秒を入力して時間を設定します。</p>`
       },
       {
-        title: "キーボード操作",
-        html: `<h2>5. ショートカット</h2><ul><li>Space：開始 / 一時停止</li><li>N：次へ</li><li>R：リセット</li><li>M：進行表を開閉</li><li>Esc：画面を閉じる</li><li>← / →：1秒減らす / 増やす</li><li>↓ / ↑：10秒減らす / 増やす</li></ul>`
+        title: "便利なキー",
+        html: `<h2>5. キーボード操作</h2><ul><li>Space：開始 / 一時停止</li><li>N：次へ</li><li>R：リセット</li><li>M：進行表を開く / 閉じる</li><li>矢印キー：時間調整</li></ul>`
       },
       {
         title: "警告表示",
-        html: `<h2>6. 終了が近づいたとき</h2><p>残り30秒になると背景が点灯し、残り10秒以下になるとより強く点滅します。時間を超過すると、タイマーは赤色になり、超過時間が表示されます。</p>`
+        html: `<h2>6. 終了前の表示</h2><p>残り30秒で背景が光り、残り10秒で強く点滅します。時間を超えると赤く表示されます。</p>`
       }
     ];
 
